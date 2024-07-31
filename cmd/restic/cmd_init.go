@@ -90,6 +90,7 @@ func runInit(ctx context.Context, opts InitOptions, gopts GlobalOptions, args []
 
 	be, err := create(ctx, gopts.Repo, gopts, gopts.extended)
 	if err != nil {
+		// MIKE: confirm this gets through
 		return errors.Fatalf("create repository at %s failed: %v\n", location.StripPassword(gopts.backends, gopts.Repo), err)
 	}
 
@@ -103,6 +104,7 @@ func runInit(ctx context.Context, opts InitOptions, gopts GlobalOptions, args []
 
 	err = s.Init(ctx, version, gopts.password, chunkerPolynomial)
 	if err != nil {
+		// MIKE: confirm this gets through
 		return errors.Fatalf("create key in repository at %s failed: %v\n", location.StripPassword(gopts.backends, gopts.Repo), err)
 	}
 

@@ -615,6 +615,7 @@ func innerOpen(ctx context.Context, s string, gopts GlobalOptions, opts options.
 		return nil, fmt.Errorf("Fatal: %w at %v: %v", ErrNoRepository, location.StripPassword(gopts.backends, s), err)
 	}
 	if err != nil {
+		// MIKE: confirm this gets through
 		return nil, errors.Fatalf("unable to open repository at %v: %v", location.StripPassword(gopts.backends, s), err)
 	}
 

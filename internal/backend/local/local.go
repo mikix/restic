@@ -112,6 +112,10 @@ func (b *Local) IsPermanentError(err error) bool {
 	return b.IsNotExist(err) || errors.Is(err, errTooShort) || errors.Is(err, os.ErrPermission)
 }
 
+func (b *Local) IsOutOfSpaceError(err error) bool {
+	return errors.Is(err, syscall.ENOSPC)
+}
+
 // Save stores data in the backend at the handle.
 func (b *Local) Save(_ context.Context, h backend.Handle, rd backend.RewindReader) (err error) {
 	finalname := b.Filename(h)

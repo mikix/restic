@@ -111,6 +111,7 @@ func Create(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, er
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		fmt.Printf("MIKE: creating http error: %v\n", resp.StatusCode)
 		return nil, &restError{backend.Handle{}, resp.StatusCode, resp.Status}
 	}
 

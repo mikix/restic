@@ -90,6 +90,7 @@ func UpgradeRepo(ctx context.Context, repo *Repository) error {
 		// try contingency methods, reupload the original file
 		_ = repo.be.Remove(ctx, h)
 		err = repo.be.Save(ctx, h, backend.NewByteReader(rawConfigFile, nil))
+		err = repo.convertBackendError(err)
 		if err != nil {
 			repoError.ReuploadOldConfigError = err
 		}

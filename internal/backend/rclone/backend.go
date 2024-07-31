@@ -48,6 +48,7 @@ func run(command string, args ...string) (*StdioConn, *sync.WaitGroup, chan stru
 
 	p, err := cmd.StderrPipe()
 	if err != nil {
+		fmt.Printf("MIKE1")
 		return nil, nil, nil, nil, err
 	}
 
@@ -68,6 +69,7 @@ func run(command string, args ...string) (*StdioConn, *sync.WaitGroup, chan stru
 
 	r, stdin, err := os.Pipe()
 	if err != nil {
+		fmt.Printf("MIKE2")
 		return nil, nil, nil, nil, err
 	}
 
@@ -76,6 +78,7 @@ func run(command string, args ...string) (*StdioConn, *sync.WaitGroup, chan stru
 		// close first pipe and ignore subsequent errors
 		_ = r.Close()
 		_ = stdin.Close()
+		fmt.Printf("MIKE3")
 		return nil, nil, nil, nil, err
 	}
 
@@ -97,6 +100,7 @@ func run(command string, args ...string) (*StdioConn, *sync.WaitGroup, chan stru
 		if errors.Is(err, exec.ErrDot) {
 			return nil, nil, nil, nil, errors.Errorf("cannot implicitly run relative executable %v found in current directory, use -o rclone.program=./<program> to override", cmd.Path)
 		}
+		fmt.Printf("MIKE5")
 		return nil, nil, nil, nil, err
 	}
 
@@ -150,6 +154,7 @@ func newBackend(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend,
 	if cfg.Program != "" {
 		a, err := backend.SplitShellStrings(cfg.Program)
 		if err != nil {
+			fmt.Printf("MIKE6")
 			return nil, err
 		}
 		args = append(args, a...)
@@ -170,8 +175,10 @@ func newBackend(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend,
 	arg0, args := args[0], args[1:]
 
 	debug.Log("running command: %v %v", arg0, args)
+	fmt.Printf("MIKE: running command: %v %v\n", arg0, args)
 	stdioConn, wg, waitCh, bg, err := run(arg0, args...)
 	if err != nil {
+		fmt.Printf("MIKE7")
 		return nil, err
 	}
 
@@ -232,6 +239,7 @@ func newBackend(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend,
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
+		fmt.Printf("MIKE8")
 		return nil, err
 	}
 	req.Header.Set("Accept", rest.ContentTypeV2)
@@ -266,11 +274,13 @@ func newBackend(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend,
 func Open(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, error) {
 	be, err := newBackend(ctx, cfg, lim)
 	if err != nil {
+		fmt.Printf("MIKE9")
 		return nil, err
 	}
 
 	url, err := url.Parse("http://localhost/")
 	if err != nil {
+		fmt.Printf("MIKE10")
 		return nil, err
 	}
 
@@ -282,6 +292,7 @@ func Open(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, error
 	restBackend, err := rest.Open(ctx, restConfig, debug.RoundTripper(be.tr))
 	if err != nil {
 		_ = be.Close()
+		fmt.Printf("MIKE11")
 		return nil, err
 	}
 
@@ -293,6 +304,7 @@ func Open(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, error
 func Create(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, error) {
 	be, err := newBackend(ctx, cfg, lim)
 	if err != nil {
+		fmt.Printf("MIKE12")
 		return nil, err
 	}
 
@@ -300,6 +312,7 @@ func Create(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, err
 
 	url, err := url.Parse("http://localhost/")
 	if err != nil {
+		fmt.Printf("MIKE13")
 		return nil, err
 	}
 
@@ -311,6 +324,7 @@ func Create(ctx context.Context, cfg Config, lim limiter.Limiter) (*Backend, err
 	restBackend, err := rest.Create(ctx, restConfig, debug.RoundTripper(be.tr))
 	if err != nil {
 		_ = be.Close()
+		fmt.Printf("MIKE14\n")
 		return nil, err
 	}
 
@@ -332,6 +346,7 @@ func (be *Backend) Close() error {
 		debug.Log("timeout, closing file descriptors")
 		err := be.conn.CloseAll()
 		if err != nil {
+			fmt.Printf("MIKE15")
 			return err
 		}
 	}

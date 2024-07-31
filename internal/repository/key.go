@@ -275,6 +275,7 @@ func AddKey(ctx context.Context, s *Repository, password, username, hostname str
 	}
 
 	err = s.be.Save(ctx, h, backend.NewByteReader(buf, s.be.Hasher()))
+	err = s.convertBackendError(err)
 	if err != nil {
 		return nil, err
 	}

@@ -99,6 +99,11 @@ func AsBackend[B Backend](b Backend) B {
 	return be
 }
 
+type SpaceLimitedBackend interface {
+	Backend
+	IsOutOfSpaceError(err error) bool
+}
+
 type FreezeBackend interface {
 	Backend
 	// Freeze blocks all backend operations except those on lock files

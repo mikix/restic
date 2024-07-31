@@ -104,6 +104,26 @@ func (c *CompressionMode) Type() string {
 	return "mode"
 }
 
+// errNoSpace is returned when the backend is out of space.
+// It's a simple wrapper that is easy to detect with errors.As() while
+// preserving the original error.
+type errNoSpace struct {
+	err error
+}
+
+func (e *errNoSpace) Error() string {
+	return e.err.Error()
+}
+
+func (e *errNoSpace) Unwrap() error {
+	return e.err
+}
+
+func IsOutOfSpaceError(err error) bool {
+	var e *errNoSpace
+	return errors.As(err, &e)
+}
+
 // New returns a new repository with backend be.
 func New(be backend.Backend, opts Options) (*Repository, error) {
 	if opts.Compression == CompressionInvalid {
@@ -141,6 +161,17 @@ func (r *Repository) Config() restic.Config {
 // packSize return the target size of a pack file when uploading
 func (r *Repository) packSize() uint {
 	return r.opts.PackSize
+}
+
+func (r *Repository) convertBackendError(err error) error {
+	if err == nil {
+		return nil
+	}
+	slbe := backend.AsBackend[backend.SpaceLimitedBackend](r.be)
+	if slbe != nil && slbe.IsOutOfSpaceError(err) {
+		return &errNoSpace{err}
+	}
+	return err
 }
 
 // UseCache replaces the backend with the wrapped cache.
@@ -475,6 +506,7 @@ func (r *Repository) SaveUnpacked(ctx context.Context, t restic.FileType, buf []
 	h := backend.Handle{Type: t, Name: id.String()}
 
 	err = r.be.Save(ctx, h, backend.NewByteReader(ciphertext, r.be.Hasher()))
+	err = r.convertBackendError(err)
 	if err != nil {
 		debug.Log("error saving blob %v: %v", h, err)
 		return restic.ID{}, err
@@ -891,6 +923,7 @@ func (r *Repository) SaveBlob(ctx context.Context, t restic.BlobType, buf []byte
 	if !known || storeDuplicate {
 		size, err = r.saveAndEncrypt(ctx, t, buf, newID)
 	}
+	err = r.convertBackendError(err)
 
 	return newID, known, size, err
 }

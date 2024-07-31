@@ -85,6 +85,7 @@ retryLoop:
 			break retryLoop
 		}
 	}
+	err = repo.convertBackendError(err)
 	if restic.IsInvalidLock(err) {
 		return nil, ctx, errors.Fatalf("%v\n\nthe `unlock --remove-all` command can be used to remove invalid locks. Make sure that no other restic process is accessing the repository when running the command", err)
 	}

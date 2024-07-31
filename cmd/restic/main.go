@@ -165,7 +165,7 @@ func main() {
 		exitMessage = fmt.Sprintf("Warning: %v", err)
 	case errors.IsFatal(err):
 		exitMessage = err.Error()
-	case errors.Is(err, repository.ErrNoKeyFound):
+	case errors.Is(err, repository.ErrNoKeyFound) || repository.IsOutOfSpaceError(err):
 		exitMessage = fmt.Sprintf("Fatal: %v", err)
 	case err != nil:
 		exitMessage = fmt.Sprintf("%+v", err)
@@ -191,6 +191,8 @@ func main() {
 		exitCode = 11
 	case errors.Is(err, repository.ErrNoKeyFound):
 		exitCode = 12
+	case repository.IsOutOfSpaceError(err):
+		exitCode = 13
 	case errors.Is(err, context.Canceled):
 		exitCode = 130
 	default:
@@ -201,4 +203,6 @@ func main() {
 		printExitError(exitCode, exitMessage)
 	}
 	Exit(exitCode)
+	// go build ./cmd/restic && RESTIC_PASSWORD=pass ./restic -r /media/mike/thumby/restic init; echo $?
+	// go build ./cmd/restic && RCLONE_CONFIG_DEJADUPDRIVE_TYPE=local RESTIC_PASSWORD=pass ./restic -r rclone:dejadupdrive:/media/mike/thumby/restic init; echo $
 }
