@@ -255,12 +255,6 @@ func (b *Local) Stat(_ context.Context, h backend.Handle) (backend.FileInfo, err
 func (b *Local) Remove(_ context.Context, h backend.Handle) error {
 	fn := b.Filename(h)
 
-	// reset read-only flag
-	err := os.Chmod(fn, 0666)
-	if err != nil && !os.IsPermission(err) {
-		return errors.WithStack(err)
-	}
-
 	return os.Remove(fn)
 }
 
